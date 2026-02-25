@@ -54,8 +54,6 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { content, category } = body;
 
-    console.log(userId);
-
     // Validation
     if (!content || content.trim().length < 3) {
       return NextResponse.json(

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import AuthModal from "./AuthModal";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface User {
   id: string;
@@ -13,29 +14,30 @@ const Header = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+
 
   useEffect(() => {
-    fetch("/api/user/me")
-      .then(res => res.json())
-      .then(data => setUser(data.user));
+    const fetchUser = async () => {
+      const res = await axios.get("/api/user")
+      console.log(res.data);
+      setUser(res.data);
+    }
+    fetchUser();
   }, []);
 
   const handleLogout = async () => {
-    await fetch("/api/user/logout", { method: "POST" });
+    await axios.post("/api/user/logout");
     setUser(null);
     setOpen(false);
   };
 
   return (
     <>
-      <header className="sticky top-0 bg-white/80 backdrop-blur-md border-b border-gray-200 z-40">
+      <header className="sticky top-0 bg-transparent backdrop-blur-md z-40">
         <div className="max-w-2xl mx-auto flex items-center justify-between py-3 px-4">
 
           <h1
-            onClick={scrollToTop}
+            onClick={() => { router.push("/") }}
             className="text-xl font-semibold tracking-tight cursor-pointer"
           >
             Echoes
@@ -45,14 +47,14 @@ const Header = () => {
 
             <button
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-gray-100 transition cursor-pointer"
+              className="flex items-center gap-3 px-3 py-2 rounded-xl transition cursor-pointer"
             >
               <div className="w-9 h-9 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-semibold text-sm shadow-sm">
-                {user ? user.username[0].toUpperCase() : "A"}
+                {user ? user.username : "A"}
               </div>
 
               <span className="text-sm font-medium text-gray-700 hidden sm:block">
-                {user ? user.username : "Anonymous"}
+                {user ? user.username?.charAt(0) : "Anonymous"}
               </span>
 
               <svg
@@ -75,7 +77,7 @@ const Header = () => {
                       setAuthOpen(true);
                       setOpen(false);
                     }}
-                    className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition"
+                    className="w-full text-left px-4 py-2 text-sm transition"
                   >
                     Login / Register
                   </button>
@@ -84,8 +86,8 @@ const Header = () => {
                 {user && (
                   <>
                     <button
-                      className="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 transition cursor-pointer"
-                      onClick={() => { router.push(`/user/${user?.id}`) }}
+                      className="w-full text-left px-4 py-2 text-sm transition cursor-pointer text-black hover:bg-gray-50"
+                      onClick={() => { router.push(`/user`) }}
                     >
                       Profile
                     </button>
