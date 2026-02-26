@@ -5,6 +5,9 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 
 
+interface User {
+  username: string;
+}
 interface Post {
   id: string;
   content: string;
@@ -28,11 +31,16 @@ interface Comment {
   userId: string;
   confessionId: string;
   createdAt: string;
+  user: User;
 }
 
 const reactionLabels: Record<string, string> = {
   STAY_STRONG: "💪 Stay Strong",
   SUPPORT: "🤝 Support",
+  RELATE: "🫶 Relate",
+  HUG: "🤗 Hug",
+  PROUD_OF_YOU: "🌟 Proud of You",
+  THATS_TOUGH: "💔 That's Tough",
 };
 
 const WORD_LIMIT = 50;
@@ -47,7 +55,6 @@ const ProfilePage = () => {
     const fetchPosts = async () => {
       try {
         const res = await axios.get("/api/user/posts");
-        console.log(res.data);
         setPosts(res.data);
       } catch (err: any) {
         if (err.response?.status === 401) {
@@ -181,8 +188,11 @@ const ProfilePage = () => {
                       key={comment.id}
                       className="bg-gray-50 p-3 rounded-lg text-sm"
                     >
+                      <div className="text-gray-800 font-semibold">
+                        {comment.user.username}
+                      </div>
                       <div className="text-gray-800 whitespace-pre-wrap">
-                        {comment.text}
+                        {comment.text} { }
                       </div>
                       <div className="text-xs text-gray-400 mt-1">
                         {new Date(comment.createdAt).toLocaleDateString()}

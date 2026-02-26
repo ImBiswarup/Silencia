@@ -16,7 +16,18 @@ export async function GET() {
   const posts = await prisma.confession.findMany({
     where: { userId },
     orderBy: { createdAt: "desc" },
-    include: { reactions: true, comments: true },
+    include: {
+      reactions: true,
+      comments: {
+        include: {
+          user: {
+            select: {
+              username: true,
+            }
+          }
+        }
+      }
+    },
   });
 
   return NextResponse.json(posts);

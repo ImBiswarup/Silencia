@@ -19,7 +19,6 @@ const Header = () => {
   useEffect(() => {
     const fetchUser = async () => {
       const res = await axios.get("/api/user")
-      console.log(res.data);
       setUser(res.data);
     }
     fetchUser();

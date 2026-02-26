@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function PATCH(
@@ -6,16 +7,17 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { type } = await req.json(); // e.g. SUPPORT, HUG, RELATE
+  const { type } = await req.json();
+  const cookieStore = cookies();
+  const userId = (await cookieStore).get("userId")?.value;
 
-  if (!type) {
+  if (!type || !userId) {
     return NextResponse.json(
-      { error: "Reaction type required" },
+      { error: "Reaction type and user ID required" },
       { status: 400 }
     );
   }
 
-  const userId = "demo-user"; // replace with real auth later
 
   const existing = await prisma.reaction.findUnique({
     where: {
@@ -27,7 +29,6 @@ export async function PATCH(
   });
 
   if (!existing) {
-    // ➕ Create new reaction
     await prisma.reaction.create({
       data: {
         confessionId: id,
@@ -36,19 +37,16 @@ export async function PATCH(
       },
     });
   } else if (existing.type === type) {
-    // ❌ Clicking same reaction removes it
     await prisma.reaction.delete({
       where: { id: existing.id },
     });
   } else {
-    // 🔄 Change reaction type
     await prisma.reaction.update({
       where: { id: existing.id },
       data: { type },
     });
   }
 
-  // 🔢 Aggregate updated counts
   const grouped = await prisma.reaction.groupBy({
     by: ["type"],
     where: { confessionId: id },
@@ -57,7 +55,6 @@ export async function PATCH(
     },
   });
 
-  // Convert to { SUPPORT: 3, HUG: 2 }
   const reactionCounts = grouped.reduce((acc, item) => {
     acc[item.type] = item._count.type;
     return acc;
@@ -67,8 +64,8 @@ export async function PATCH(
     !existing
       ? type
       : existing.type === type
-      ? null
-      : type;
+        ? null
+        : type;
 
   return NextResponse.json({
     reactions: reactionCounts,

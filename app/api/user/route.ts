@@ -15,5 +15,10 @@ export async function GET() {
     select: { id: true, username: true, confessions: true },
   });
 
-  return NextResponse.json({ user });
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  } else {
+    return NextResponse.json({ user });
+  }
+
 } 

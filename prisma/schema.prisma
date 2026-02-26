@@ -15,10 +15,10 @@ enum Category {
 }
 
 enum ReactionType {
+  STAY_STRONG
   SUPPORT
   RELATE
   HUG
-  STAY_STRONG
   PROUD_OF_YOU
   THATS_TOUGH
 }
